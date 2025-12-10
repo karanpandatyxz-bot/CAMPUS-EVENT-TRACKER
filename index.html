@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Event Tracker - Enhanced</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <h1><i class="fas fa-calendar-alt"></i> Campus Event Tracker</h1>
+                <div class="header-controls">
+                    <button id="themeToggle" class="btn btn-icon" title="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button id="exportMenuBtn" class="btn btn-icon" title="Export Options">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="subtitle">Stay updated with all college events in one place</p>
+        </div>
+    </header>
+
+    <!-- Export Dropdown Menu (Hidden by default) -->
+    <div id="exportMenu" class="dropdown-menu">
+        <button id="exportJson" class="dropdown-item">
+            <i class="fas fa-file-code"></i> Export as JSON
+        </button>
+        <button id="exportCsv" class="dropdown-item">
+            <i class="fas fa-file-csv"></i> Export as CSV
+        </button>
+        <button id="importJson" class="dropdown-item">
+            <i class="fas fa-file-upload"></i> Import JSON
+        </button>
+        <hr class="dropdown-divider">
+        <button id="printEvents" class="dropdown-item">
+            <i class="fas fa-print"></i> Print Events
+        </button>
+    </div>
+
+    <!-- Import File Input (Hidden) -->
+    <input type="file" id="importFile" accept=".json,.csv" style="display: none;">
+
+    <!-- Main Content -->
+    <div class="container main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="form-card">
+                <h2><i class="fas fa-plus-circle"></i> Add New Event</h2>
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label for="eventName"><i class="fas fa-heading"></i> Event Name</label>
+                        <input type="text" id="eventName" placeholder="e.g., Tech Symposium 2024" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventDate"><i class="fas fa-calendar-day"></i> Date & Time</label>
+                        <input type="datetime-local" id="eventDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventLocation"><i class="fas fa-map-marker-alt"></i> Location</label>
+                        <input type="text" id="eventLocation" placeholder="e.g., Main Auditorium" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventCategory"><i class="fas fa-tag"></i> Category</label>
+                        <select id="eventCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="academic">Academic</option>
+                            <option value="technical">Technical</option>
+                            <option value="cultural">Cultural</option>
+                            <option value="sports">Sports</option>
+                            <option value="workshop">Workshop</option>
+                            <option value="seminar">Seminar</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventDescription"><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="eventDescription" rows="3" placeholder="Brief description of the event..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventOrganizer"><i class="fas fa-user-tie"></i> Organizer</label>
+                        <input type="text" id="eventOrganizer" placeholder="e.g., Computer Science Department">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="eventCapacity"><i class="fas fa-users"></i> Capacity (Optional)</label>
+                        <input type="number" id="eventCapacity" min="1" placeholder="e.g., 100">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Event
+                        </button>
+                        <button type="button" id="clearForm" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Clear
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="stats">
+                    <h3><i class="fas fa-chart-bar"></i> Quick Stats</h3>
+                    <div class="stat-items">
+                        <div class="stat-item">
+                            <span class="stat-number" id="totalEvents">0</span>
+                            <span class="stat-label">Total Events</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="upcomingEvents">0</span>
+                            <span class="stat-label">Upcoming</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="pastEvents">0</span>
+                            <span class="stat-label">Past</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <div class="controls-group">
+                    <h3><i class="fas fa-filter"></i> Filter Events</h3>
+                    <div class="filter-options">
+                        <button class="filter-btn active" data-category="all">All Events</button>
+                        <button class="filter-btn" data-category="academic">
+                            <i class="fas fa-graduation-cap"></i> Academic
+                        </button>
+                        <button class="filter-btn" data-category="technical">
+                            <i class="fas fa-laptop-code"></i> Technical
+                        </button>
+                        <button class="filter-btn" data-category="cultural">
+                            <i class="fas fa-music"></i> Cultural
+                        </button>
+                        <button class="filter-btn" data-category="sports">
+                            <i class="fas fa-running"></i> Sports
+                        </button>
+                        <button class="filter-btn" data-category="workshop">
+                            <i class="fas fa-tools"></i> Workshop
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="controls-group">
+                    <div class="sort-search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Search events...">
+                        </div>
+                        
+                        <select id="sortOptions" class="sort-select">
+                            <option value="date-asc">Sort by: Date (Earliest)</option>
+                            <option value="date-desc">Date (Latest)</option>
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="category">Category</option>
+                        </select>
+                        
+                        <button id="clearFilters" class="btn btn-outline">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events Display -->
+            <div class="events-container">
+                <div class="events-header">
+                    <h2><i class="fas fa-calendar-check"></i> Upcoming Events</h2>
+                    <div class="view-toggle">
+                        <button id="viewList" class="view-btn active" title="List View">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        <button id="viewGrid" class="view-btn" title="Grid View">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="eventsList" class="events-list grid-view">
+                    <!-- Events loaded dynamically -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading events...
+                    </div>
+                </div>
+                
+                <!-- No events message -->
+                <div id="noEvents" class="no-events" style="display: none;">
+                    <i class="fas fa-calendar-times fa-3x"></i>
+                    <h3>No Events Found</h3>
+                    <p>Try adjusting your filters or add a new event!</p>
+                </div>
+
+                <!-- Import success message -->
+                <div id="importSuccess" class="alert alert-success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Events imported successfully!</span>
+                    <button class="alert-close">&times;</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Campus Event Tracker Enhanced &copy; 2024 | College Project</p>
+            <p class="footer-note">
+                <span id="dataStatus">Data stored in browser</span> | 
+                <span id="eventCount">0 events</span> | 
+                <button id="clearAllData" class="btn-link">Clear All Data</button>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirm Action</h3>
+            <p id="modalMessage">Are you sure you want to proceed?</p>
+            <div class="modal-actions">
+                <button id="modalConfirm" class="btn btn-danger">Confirm</button>
+                <button id="modalCancel" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
